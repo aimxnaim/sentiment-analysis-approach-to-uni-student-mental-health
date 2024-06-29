@@ -164,4 +164,4 @@ cython_debug/
 Report.pdf
 /scikit-learn
 .vscode
-/sentiment_analysis
+/sentiment-analysis/virtual-lab.git
