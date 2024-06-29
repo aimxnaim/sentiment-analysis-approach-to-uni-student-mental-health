@@ -1,0 +1,690 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="generator" content="Mobirise v5.8.9, mobirise.com">
+    <meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+    <link rel="shortcut icon" href="/static/assets/images/logo-removebg-preview-128x128.png" type="image/x-icon">
+    <meta name="description" content="">
+
+
+    <title>Dashboard</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tutorbook/tutorbook@3.2.2/build/tutorbook.min.css">
+    <link rel="stylesheet" href="/static/assets/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/static/assets/bootstrap/css/bootstrap-grid.min.css">
+    <link rel="stylesheet" href="/static/assets/bootstrap/css/bootstrap-reboot.min.css">
+    <link rel="stylesheet" href="/static/assets/animatecss/animate.css">
+    <link rel="stylesheet" href="/static/assets/dropdown/css/style.css">
+    <link rel="stylesheet" href="/static/assets/socicon/css/styles.css">
+    <link rel="stylesheet" href="/static/assets/theme/css/style.css">
+    <link rel="preload"
+        href="https://fonts.googleapis.com/css?family=Jost:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i&display=swap"
+        as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript>
+        <link rel="stylesheet"
+            href="https://fonts.googleapis.com/css?family=Jost:100,200,300,400,500,600,700,800,900,100i,200i,300i,400i,500i,600i,700i,800i,900i&display=swap">
+    </noscript>
+    <link rel="preload" as="style" href="/static/assets/mobirise/css/mbr-additional.css">
+    <link rel="stylesheet" href="/static/assets/mobirise/css/mbr-additional.css" type="text/css">
+
+    <style>
+        .section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-bottom: 40px;
+            width: 100%;
+        }
+
+        .chart {
+            width: 400px;
+            height: 400px;
+            border-radius: 50%;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0px 4px 16px rgba(0, 0, 0, 0.1);
+        }
+
+        .label {
+            font-size: 28px;
+            text-align: center;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: #fff;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.4);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .label.active {
+            opacity: 1;
+        }
+
+        .label-depression {
+            background-color: #A50104;
+            padding: 8px 16px;
+            border-radius: 4px;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            color: #fff;
+            font-size: 16px;
+            text-shadow: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .label-non-depression {
+            background-color: #FCBA04;
+            padding: 8px 16px;
+            border-radius: 4px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #fff;
+            font-size: 16px;
+            text-shadow: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .label-depression.active,
+        .label-non-depression.active {
+            opacity: 1;
+        }
+
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .loading-text {
+            font-size: 20px;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 32px;
+            margin-bottom: 16px;
+            color: #555;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .bar-chart {
+            width: 800px;
+            height: 500px;
+        }
+
+        .color-indicator {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 10px;
+        }
+
+        .color-indicator-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .color-indicator-item span {
+            margin-right: 10px;
+        }
+
+        .color-indicator-item .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        /* Styling for the histogram */
+        .histogram-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 800px;
+            padding: 20px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 600px;
+            width: 65%;
+            /* Adjust the width of the container (e.g., 95% of the parent element) */
+            margin: 0 auto;
+            /* Center the container horizontally */
+        }
+
+        /* Apply styles to the histogram container */
+        .histogram-container .plot-container {
+            width: 95%;
+            /* Adjust the width of the plot container */
+            height: 95%;
+            /* Adjust the height of the plot container */
+        }
+
+        /* Styling for the color scale indicator */
+        .color-scale-container {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            margin-top: 10px;
+            width: 20px;
+            /* Adjust the width of the color scale indicator */
+        }
+
+        .color-scale-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .color-scale-label {
+            font-size: 12px;
+            margin-right: 5px;
+        }
+
+        .color-box {
+            width: 20px;
+            height: 20px;
+            border-radius: 2px;
+        }
+
+        /* Legends container */
+        .legends-container {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            margin-right: 20px;
+        }
+
+        .legend-item .color-box {
+            width: 15px;
+            height: 15px;
+            margin-right: 5px;
+        }
+
+        .custom-margin-top {
+            margin-top: 10px;
+            /* Adjust the margin value as per your preference */
+        }
+    </style>
+</head>
+
+<body>
+    <section data-bs-version="5.1" class="menu cid-s48OLK6784" once="menu" id="menu1-1x">
+
+        <nav class="navbar navbar-dropdown navbar-fixed-top navbar-expand-lg">
+            <div class="container">
+                <div class="navbar-brand">
+                    <span class="navbar-logo">
+                        <img src="/static/assets/images/logo-removebg-preview-128x128.png" alt="Home Page"
+                            style="height: 3.8rem;">
+                    </span>
+                    <span class="navbar-caption-wrap"><a class="navbar-caption text-black text-primary display-7"
+                            href="{{ url_for('index') }}">SereneMinds</a></span>
+                </div>
+                <button class="navbar-toggler" type="button" data-toggle="collapse" data-bs-toggle="collapse"
+                    data-target="#navbarSupportedContent" data-bs-target="#navbarSupportedContent"
+                    aria-controls="navbarNavAltMarkup" aria-expanded="false" aria-label="Toggle navigation">
+                    <div class="hamburger">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav nav-dropdown nav-right" data-app-modern-menu="true">
+                        <li class="nav-item"><a class="nav-link link show text-black display-4"
+                                href="{{ url_for('index') }}" aria-expanded="false">Home</a></li>
+                        <li class="nav-item"><a class="nav-link link text-black text-primary display-4"
+                                href="{{ url_for('anonymous') }}">Anonymous Space</a></li>
+                        <li class="nav-item dropdown"><a class="nav-link link dropdown-toggle text-black display-4"
+                                href="{{ url_for('mental_health_articles') }}" data-toggle="dropdown-submenu"
+                                data-bs-toggle="dropdown" data-bs-auto-close="outside"
+                                aria-expanded="false">Articles&nbsp;</a>
+                            <div class="dropdown-menu" aria-labelledby="dropdown-318"><a
+                                    class="show dropdown-item text-black text-primary display-4"
+                                    href="{{ url_for('mental_health_articles') }}">What is Mental Health?</a><a
+                                    class="dropdown-item text-black text-primary display-4"
+                                    href="{{ url_for('depression_articles') }}">What is Depression?</a></div>
+                        </li>
+                        <li class="nav-item"><a class="nav-link link show text-black text-primary display-4"
+                                href="{{ url_for('dashboard') }}">Dashboard</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </section>
+
+    <section data-bs-version="5.1" class="features23 cid-tK2rWPeh85" id="features23-24">
+        <div class="container">
+            <div class="card-wrapper">
+                <div class="card-box align-left">
+                    <h4 class="mbr-section-title mbr-fonts-style display-2"><strong>How many tweets we have
+                            trained<br>in totals?</strong></h4>
+                </div>
+            </div>
+            <!-- col-12 col-md-6 col-lg-4 -->
+            <div class="row justify-content-center content-row mt-4">
+                <div class="card p-4 p-md-3 col-md-6 col-lg-4">
+                    <div class="card-box">
+                        <div class="title">
+                            <span class="num mbr-fonts-style display-1 align-left"><strong>1941</strong></span>
+                        </div>
+                        <h4 class="card-title mbr-fonts-style display-5">
+                            <strong>Number of texts</strong>
+                        </h4>
+                        <p class="mbr-text card-text mbr-fonts-style display-7">About <strong>1941 </strong>texts has
+                            been colloected using web scraping and research.</p>
+                    </div>
+                </div>
+                <div class="card p-4 p-md-3 col-md-6 col-lg-4">
+                    <div class="card-box">
+                        <div class="title">
+                            <span class="num mbr-fonts-style display-2 align-left"><strong>1021</strong></span>
+                        </div>
+                        <h4 class="card-title mbr-fonts-style display-5">
+                            <strong>Depression</strong>
+                        </h4>
+                        <p class="mbr-text card-text mbr-fonts-style display-7">
+                            There are about <strong>1021 </strong>depressive texts that has been collected and approved
+                            by the medical authorities consists the symptoms of depression.&nbsp;</p>
+                    </div>
+                </div>
+                <div class="card p-4 p-md-3 col-md-6 col-lg-4">
+                    <div class="card-box">
+                        <div class="title">
+                            <span class="num mbr-fonts-style display-2 align-left"><strong>920</strong></span>
+                        </div>
+                        <h4 class="card-title mbr-fonts-style display-5">
+                            <strong>Non - depression</strong>
+                        </h4>
+                        <p class="mbr-text card-text mbr-fonts-style display-7">There are about <strong>920
+                            </strong>texts that is consists of random tweet text that are not exhibit any depression
+                            symptoms.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section data-bs-version="5.1" class="features4 cid-tK4cT4vjpQ" id="features4-2i">
+        <div class="container">
+            <div class="mbr-section-head">
+                <h4 class="mbr-section-title mbr-fonts-style align-center mb-0 display-2"><strong>Wordcloud Analysis
+                        -&nbsp;<br>Depression vs. Non-Depression</strong></h4>
+                <h5 class="mbr-section-subtitle mbr-fonts-style align-center mb-0 mt-2 display-7"><br>Explore the
+                    wordcloud visualizations below to gain insights into the text data related<br>to depression&nbsp;and
+                    non-depression. The wordclouds represent the most <br>frequently occurring words&nbsp;in each
+                    category, providing a glimpse into <br>the prevalent&nbsp;themes and emotions associated with
+                    them.<br><br></h5>
+            </div>
+            <div class="row mt-4">
+                <div class="item features-image сol-12 col-md-6 col-lg-6">
+                    <div class="item-wrapper">
+                        <div class="item-img">
+                            <img src="/static/assets/images/output-973x496.png" alt="Mobirise Website Builder" title="">
+                        </div>
+                        <div class="item-content">
+                            <h5 class="item-title mbr-fonts-style display-5"><strong>Non-Depression Wordcloud</strong>
+                            </h5>
+                            <p class="mbr-text mbr-fonts-style mt-3 display-7">This wordcloud displays the most
+                                frequently used words in texts that do not exhibit signs of depression. Similar to the
+                                depression wordcloud, the size of each word corresponds to its frequency. Analyze the
+                                prominent themes and emotions reflected in this visualization.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="item features-image сol-12 col-md-6 col-lg-6">
+                    <div class="item-wrapper">
+                        <div class="item-img">
+                            <img src="/static/assets/images/cloud1-973x496.png" alt="Depression wordcloud" title="">
+                        </div>
+                        <div class="item-content">
+                            <h5 class="item-title mbr-fonts-style display-5"><strong>Depression Wordcloud</strong></h5>
+                            <p class="mbr-text mbr-fonts-style mt-3 display-7">This wordcloud highlights the most common
+                                words found in texts associated with depression. The size of each word represents its
+                                frequency of occurrence, with larger words indicating higher prevalence. Take note of
+                                the recurring themes and emotions depicted in this visualization.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section data-bs-version="5.1" class="header15 cid-tK4hXweJXk" id="header15-2j">
+        <div class="container">
+            <div class="row justify-content-center" style="margin-top: 10px;"> <!-- Added inline CSS here -->
+                <!-- Column for Text Content -->
+                <div class="col-12 col-md-6">
+                    <div class="text-wrapper">
+                        <h2 class="mbr-section-title mb-3 mbr-fonts-style display-2"><strong>Sentiment
+                                Distribution</strong></h2>
+                        <p class="mbr-text mb-3 mbr-fonts-style display-7">
+                            This pie chart represents the distribution of sentiments within the dataset, categorizing
+                            them into depression and non-depression. It provides an overview of the proportion of text
+                            entries classified under each sentiment category.
+                        </p>
+                    </div>
+                </div>
+                <!-- Column for Chart -->
+                <div class="col-12 col-md-6">
+                    <div class="container2">
+                        <div class="section">
+                            <div class="title">Sentiment Distribution</div>
+                            <div class="chart" id="pie-chart"></div>
+                            <div class="label label-depression">Depressive</div>
+                            <div class="label label-non-depression">Non-Depressive</div>
+                            <div class="label" id="percentage-label"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section data-bs-version="5.1" class="header3 cid-tK4iUeYRb7" id="text-histogram-section">
+        <div class="align-center container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-6">
+                    <h1 class="mbr-section-title mbr-fonts-style mb-3 display-2"><strong>Text Length Histogram</strong>
+                    </h1>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function createHistogram(data, meanLength) {
+                // Use the data passed from Flask to create the histogram
+                var text_lengths = data.map(function (d) {
+                    return d.Text.length;
+                });
+
+                var trace = {
+                    x: text_lengths,
+                    type: 'histogram',
+                    nbinsx: 20,
+                    marker: {
+                        color: '#1c9099', // Fixed color for all bars
+                    },
+                };
+
+                var layout = {
+                    showlegend: false,
+                    margin: { t: 40, r: 20, b: 70, l: 60 }, // Add margins to show the axes labels and the legends
+                    xaxis: {
+                        title: 'Text Length',
+                    },
+                    yaxis: {
+                        title: 'Frequency',
+                    },
+                    bargap: 0.1,
+                    legend: {
+                        orientation: 'h', // Horizontal legend
+                        x: 0.5, // Center the legend horizontally
+                        y: 1.05, // Move the legend below the plot
+                    },
+                    shapes: [{
+                        type: 'line',
+                        x0: meanLength,
+                        x1: meanLength,
+                        y0: 0,
+                        y1: 1,
+                        line: {
+                            color: 'red',
+                            dash: 'dash',
+                            width: 2,
+                        },
+                    }],
+                    annotations: [{
+                        x: meanLength,
+                        y: 0.95,
+                        text: `Mean: ${meanLength.toFixed(2)}`,
+                        showarrow: true,
+                        arrowhead: 3,
+                        ax: 0,
+                        ay: -40,
+                    }],
+                };
+
+                Plotly.newPlot('histogram', [trace], layout);
+            }
+
+            // Call the function on page load
+            document.addEventListener("DOMContentLoaded", function () {
+                createHistogram();
+            });
+        </script>
+
+        <div class="section">
+            <div class="title"></div>
+            <div class="histogram-container">
+                <div class="plot-container" id="histogram"></div>
+            </div>
+        </div>
+        </div>
+    </section>
+
+    <section data-bs-version="5.1" class="header3 cid-tK4iUeYRb7" id="header3-2k">
+        <div class="align-center container">
+            <div class="row justify-content-center">
+                <div class="col-12 col-lg-6">
+                    <h1 class="mbr-section-title mbr-fonts-style mb-3 display-2"><strong>Word Frequency
+                            Analysis</strong></h1>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <div class="container2">
+        <div class="section" id="both-column-charts">
+            <!-- The Most Common Words in the Dataset for Both Column -->
+            <div class="title">The Most Common Words in the Dataset for Both Column</div>
+            <div class="bar-chart" id="bar-chart"></div>
+            <div class="color-indicator">
+                <div class="color-indicator-item">
+                    <span>Highest Count</span>
+                    <div class="color-box" style="background-color: #904C77;"></div>
+                </div>
+                <div class="color-indicator-item">
+                    <span>Lowest Count</span>
+                    <div class="color-box" style="background-color: #ECCFC3;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="depression-charts">
+            <!-- The Most Common Words in the Depression Column -->
+            <div class="title">The Most Common Words in the Depression Column</div>
+            <div class="bar-chart" id="depression-chart"></div>
+            <div class="color-indicator">
+                <div class="color-indicator-item">
+                    <span>Highest Count</span>
+                    <div class="color-box" style="background-color: #BA5624;"></div>
+                </div>
+                <div class="color-indicator-item">
+                    <span>Lowest Count</span>
+                    <div class="color-box" style="background-color: #FCDE9C;"></div>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="non-depression-charts">
+            <!-- The Most Common Words in the Non-Depression Column -->
+            <div class="title">The Most Common Words in the Non-Depression Column</div>
+            <div class="bar-chart" id="non-depression-chart"></div>
+            <div class="color-indicator">
+                <div class="color-indicator-item">
+                    <span>Highest Count</span>
+                    <div class="color-box" style="background-color: #132a20;"></div>
+                </div>
+                <div class="color-indicator-item">
+                    <span>Lowest Count</span>
+                    <div class="color-box" style="background-color: #d5ece2;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data for pie chart
+        var pieData = [{
+            values: [1021, 920],
+            labels: ['Depression', 'Non-Depression'],
+            type: 'pie',
+            marker: {
+                colors: ['#a50104', '#FCBA04']
+            },
+            hoverinfo: 'label+value+percent',
+            textinfo: 'percent',
+            textposition: 'inside',
+            textfont: {
+                family: 'Arial, sans-serif',
+                size: 28,
+                color: '#fff',
+                textshadow: '2px 2px 4px rgba(0, 0, 0, 0.4)'
+            },
+            automargin: true
+        }];
+
+        // Layout for pie chart
+        var pieLayout = {
+            showlegend: false,
+            margin: {
+                t: 30, r: 30, b: 30, l: 30
+            }
+        };
+
+        // Data for bar chart all
+        var barData = [{
+            x: [466, 152, 131, 107, 97, 94, 77, 72, 72, 72],
+            y: ["depress", "go", "feel", "like", "get", "emoji", "day", "work", "good", "love"],
+            type: 'bar',
+            marker: {
+                color: ['#904C77', '#A56086', '#BA7394', '#CF87A2', '#E49AB0', '#E8A9AB', '#EAB1A8', '#EBC0B6', '#ECC8BD', '#ECCFC3']
+            },
+            orientation: 'h'
+        }];
+
+        // Data for bar chart
+        var barData1 = [{
+            x: [466, 97, 94, 84, 70, 68, 59, 58, 50, 45],
+            y: ["depress", "feel", "emoji", "like", "go", "anxiety", "face", "get", "people", "know"],
+            type: 'bar',
+            marker: {
+                color: ['#BA5624', '#CC6A30', '#DD7E3B', '#EE9247', '#F4984B', '#F99F4E', '#FFA552', '#feb86b', '#FDCB83', '#FCDE9C']
+            },
+            orientation: 'h'
+        }];
+
+        // Data for bar chart
+        var barData2 = [{
+            x: [82, 56, 55, 47, 47, 44, 39, 39, 37, 34],
+            y: ["go", "work", "day", "good", "love", "wish", "get", "time", "new", "life"],
+            type: 'bar',
+            marker: {
+                color: ['#132a20', '#204636', '#2c634b', '#3f8d6b', '#4ca981', '#64b994', '#80c6a8', '#9cd3bb', '#b9dfcf', '#d5ece2']
+            },
+            orientation: 'h'
+        }];
+
+        // Layout for bar chart
+        var barLayout = {
+            showlegend: false,
+            margin: {
+                t: 30, r: 30, b: 70, l: 70
+            },
+            xaxis: {
+                title: 'Count'
+            },
+            yaxis: {
+                title: 'Token'
+            }
+        };
+
+        // Display loading text before the pie chart is rendered
+        var loadingText = document.createElement('div');
+        loadingText.className = 'loading-text';
+        loadingText.textContent = 'Loading...';
+        document.getElementById('pie-chart').appendChild(loadingText);
+
+        // Plot the pie chart
+        Plotly.newPlot('pie-chart', pieData, pieLayout).then(function () {
+            // Remove loading text once the pie chart is rendered
+            loadingText.remove();
+
+            // Add click event listeners to the pie chart labels
+            var labels = document.getElementsByClassName('plotlyjs-pie-label');
+            for (var i = 0; i < labels.length; i++) {
+                labels[i].addEventListener('click', toggleLabel);
+            }
+
+            // Toggle the active class for the clicked label
+            function toggleLabel(event) {
+                var label = event.target;
+                var labelDepression = document.querySelector('.label-depression');
+                var labelNonDepression = document.querySelector('.label-non-depression');
+                var percentageLabel = document.getElementById('percentage-label');
+
+                if (label.textContent === 'Depression') {
+                    labelDepression.classList.add('active');
+                    labelNonDepression.classList.remove('active');
+                } else {
+                    labelDepression.classList.remove('active');
+                    labelNonDepression.classList.add('active');
+                }
+
+                percentageLabel.textContent = label.textContent;
+                percentageLabel.classList.add('active');
+
+                // Remove the active class after 1 second
+                setTimeout(function () {
+                    percentageLabel.classList.remove('active');
+                }, 1000);
+            }
+        });
+
+        // Display the bar chart
+        Plotly.newPlot('bar-chart', barData, barLayout);
+        Plotly.newPlot('depression-chart', barData1, barLayout);
+        Plotly.newPlot('non-depression-chart', barData2, barLayout);
+    </script>
+
+    <section data-bs-version="5.1" class="footer7 cid-tLtcPzxQsl" once="footers" id="footer7-3r">
+        <div class="container">
+            <div class="media-container-row align-center mbr-white">
+                <div class="col-12">
+                    <p class="mbr-text mb-0 mbr-fonts-style display-7">
+                        © Copyright 2023 Muhammad Aiman Naim bin Mohd Faizul 😁✌️</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <script src="/static/assets/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="/static/assets/smoothscroll/smooth-scroll.js"></script>
+    <script src="/static/assets/ytplayer/index.js"></script>
+    <script src="/static/assets/dropdown/js/navbar-dropdown.js"></script>
+    <script src="/static/assets/theme/js/script.js"></script>
+
+
+    <input name="animation" type="hidden">
+</body>
+
+</html>
